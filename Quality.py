@@ -212,7 +212,7 @@ if uploaded_file is not None:
 
     # SECTION 4: GLOBAL CLOSING DISPOSITION ANALYSIS (FULL DATA)
     st.divider()
-    st.header("🌍 Global Closing Disposition Analysis (Full Data)")
+    st.header("🌍 Closing Disposition Analysis")
 
     df_global = df_processed.copy()
     df_global['Closing Status'] = df_global['Closing Status'].fillna('Unknown')
@@ -237,7 +237,7 @@ if uploaded_file is not None:
     elif df_closing_global.empty:
         st.warning("⚠️ No data matches selection.")
     else:
-        st.subheader("Global Closing Distribution by Agent")
+        st.subheader("Closing Distribution by Agent")
         df_closing_global_plot = df_closing_global.copy()
         df_closing_global_plot['Quality Agent Name'] = df_closing_global_plot['Quality Agent Name'].fillna('Not Assigned')
         closing_counts_global = df_closing_global_plot.groupby(['Quality Agent Name', 'Closing Status']).size().reset_index(name='Lead Count')
@@ -319,3 +319,4 @@ if uploaded_file is not None:
         st.success("✅ Excellent! Data is 100% complete.")
 else:
     st.info("📂 Please upload your CSV file to view the dashboard analysis.")
+
