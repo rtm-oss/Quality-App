@@ -256,7 +256,7 @@ if uploaded_file is not None:
     # SECTION 5: DETAILED LEADS REPORT
     st.divider()
     st.header("📋 Detailed Leads Report")
-    VIEW_COLUMNS = ["Quality Agent Name", "First Name", "Last Name", "Date of Sale", "Closing Status", "Validation", "Call duration", "Work duration", "Recording link"]
+    VIEW_COLUMNS = ["MCN","Quality Agent Name", "First Name", "Last Name", "Date of Sale", "Closing Status", "Validation", "Call duration", "Work duration", "Recording link"]
     final_display_cols = [col for col in VIEW_COLUMNS if col in df_closing_global.columns]
 
     st.write(f"Showing **{len(df_closing_global)}** leads based on your global selection:")
@@ -319,6 +319,7 @@ if uploaded_file is not None:
         st.success("✅ Excellent! Data is 100% complete.")
 else:
     st.info("📂 Please upload your CSV file to view the dashboard analysis.")
+
 
 
 
