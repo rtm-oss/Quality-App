@@ -312,13 +312,14 @@ if uploaded_file is not None:
                                 f'<h2 style="color:white;margin:5px 0 0 0;">{count} <span style="font-size:14px;color:#888;">Leads</span></h2></div>', unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
-            SPECIFIC_COLUMNS = ["⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", "Dialer", "Closing Status", "Date of Sale", "Call duration", "Work duration", "Quality Agent Name", "Validation", "Recording link"]
+            SPECIFIC_COLUMNS = ["⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", "Dialer", "Closing Status", "Date of Sale", "Assign Date","Finish Date","Call duration", "Work duration", "Quality Agent Name", "Validation", "Recording link"]
             st.dataframe(df_problems[[c for c in SPECIFIC_COLUMNS if c in df_problems.columns]], use_container_width=True, hide_index=True,
                          column_config={"Recording link": st.column_config.LinkColumn("🔗 Link"), "Date of Sale": st.column_config.DateColumn("📅 Date")})
     else:
         st.success("✅ Excellent! Data is 100% complete.")
 else:
     st.info("📂 Please upload your CSV file to view the dashboard analysis.")
+
 
 
 
