@@ -40,7 +40,6 @@ def process_uploaded_data(uploaded_file):
     return df_raw, df_cleaned
 
 # --- FILE UPLOADER SECTION ---
-st.info("👋 Welcome! Please upload your 'O_Plan_Leads.csv' file to start the analysis.")
 uploaded_file = st.file_uploader("📤 Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
@@ -203,4 +202,5 @@ if uploaded_file is not None:
                 st.success("✅ Data is 100% complete!")
 
 else:
+
     st.warning("📂 Please upload the CSV file to view the dashboard.")
