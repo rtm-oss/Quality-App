@@ -348,7 +348,7 @@ if not df_all_problems.empty:
         
         SPECIFIC_COLUMNS = [
             "⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", 
-            "Dialer", "Closing Status", "Date of Sale", "Call duration", 
+            "Dialer", "Closing Status", "Date of Sale", "Assign Date","Finish Date","Call duration", 
             "Work duration", "Quality Agent Name", "Validation", "Recording link"
         ]
         available_cols = [col for col in SPECIFIC_COLUMNS if col in df_problems.columns]
@@ -376,3 +376,4 @@ if not df_all_problems.empty:
         )
 else:
     st.success("✅ Excellent! All records in this selection are complete for Dates, Links, and Validation.")
+
