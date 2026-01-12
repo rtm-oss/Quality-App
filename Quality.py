@@ -5,7 +5,7 @@ import plotly.express as px
 
 # 1. Page Configuration
 st.set_page_config(page_title="📈 QA Dynamic Dashboard", layout="wide")
-st.title("⚖️ Quality Agents Dynamic Analysis")
+st.title(" Quality Agents Dynamic Analysis")
 
 # 2. Data Preparation - Columns to keep
 COLUMNS_TO_KEEP = [
@@ -319,5 +319,6 @@ if uploaded_file is not None:
         st.success("✅ Excellent! Data is 100% complete.")
 else:
     st.info("📂 Please upload your CSV file to view the dashboard analysis.")
+
 
 
