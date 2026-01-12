@@ -52,11 +52,8 @@ if uploaded_file is not None:
     if 'selected_agents' not in st.session_state:
         st.session_state.selected_agents = all_agents
 
-    def select_all():
-        st.session_state.selected_agents = all_agents
-
-    def clear_all():
-        st.session_state.selected_agents = []
+    def select_all(): st.session_state.selected_agents = all_agents
+    def clear_all(): st.session_state.selected_agents = []
 
     with st.container():
         f_col1, _ = st.columns([1, 1])
@@ -72,17 +69,10 @@ if uploaded_file is not None:
 
         st.write("🎧 **Select Quality Agent(s):**")
         btn_col1, btn_col2, _ = st.columns([1, 1, 6])
-        with btn_col1:
-            st.button("✅ Select All", on_click=select_all, use_container_width=True)
-        with btn_col2:
-            st.button("❌ Clear All", on_click=clear_all, use_container_width=True)
+        with btn_col1: st.button("✅ Select All", on_click=select_all, use_container_width=True)
+        with btn_col2: st.button("❌ Clear All", on_click=clear_all, use_container_width=True)
 
-        selected_agents = st.multiselect(
-            "Agent List", 
-            options=all_agents, 
-            key='selected_agents',
-            label_visibility="collapsed"
-        )
+        selected_agents = st.multiselect("Agent List", options=all_agents, key='selected_agents', label_visibility="collapsed")
 
     st.divider()
 
@@ -107,7 +97,6 @@ if uploaded_file is not None:
         Total_Efficiency_Gap=("Duration Difference", "sum"),
         Total_Agent_Leads=("Quality Agent Name", "count") 
     ).reset_index()
-
     Qa_stats = Qa_stats.sort_values(by="Total_Efficiency_Gap", ascending=False)
 
     # --- SECTION 1: PERFORMANCE OVERVIEW ---
@@ -127,7 +116,6 @@ if uploaded_file is not None:
         <p style="color: #BDC3C7; font-size: 14px; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">{label}</p>
         <p style="color: {color}; font-size: 24px; font-weight: bold; margin: 0;">{value}</p></div>""", unsafe_allow_html=True)
 
-    st.subheader("📌 Global Totals")
     t1, t2, t3, t4, t5 = st.columns(5)
     with t1: create_card("Total Leads", f"{total_leads_in_sheet:,}", color="#F1C40F")
     with t2: create_card("Leads Selected", f"{leads_in_selection:,}", color="#3498DB")
@@ -135,7 +123,6 @@ if uploaded_file is not None:
     with t4: create_card("Total Work Time", f"{total_work_time:,.0f} min", color="#9B59B6")
     with t5: create_card("Total Efficiency Gap", f"{total_gap_sum:,.1f} min", color=total_gap_color)
 
-    st.subheader("💡 Performance Averages (Per Lead)")
     a1, a2, a3 = st.columns(3)
     with a1: create_card("Avg Call Duration", f"{avg_call_time:.2f} min", color="#2ECC71")
     with a2: create_card("Avg Work Duration", f"{avg_work_time:.2f} min", color="#9B59B6")
@@ -148,15 +135,13 @@ if uploaded_file is not None:
     chart_col1, chart_col2 = st.columns(2)
     with chart_col1:
         st.subheader("📊 Total Duration & Gap Comparison")
-        plot_durations = Qa_stats.melt(id_vars="Quality Agent Name", value_vars=["Total_Call_Duration", "Total_Work_Duration", "Total_Efficiency_Gap"], var_name="Metric", value_name="Minutes")
-        fig_durations = px.bar(plot_durations, x="Quality Agent Name", y="Minutes", color="Metric", barmode="group", text_auto='.1f', 
+        plot_dur = Qa_stats.melt(id_vars="Quality Agent Name", value_vars=["Total_Call_Duration", "Total_Work_Duration", "Total_Efficiency_Gap"], var_name="Metric", value_name="Minutes")
+        fig_durations = px.bar(plot_dur, x="Quality Agent Name", y="Minutes", color="Metric", barmode="group", text_auto='.1f', 
                                color_discrete_map={"Total_Call_Duration": "#2ECC71", "Total_Work_Duration": "#E74C3C", "Total_Efficiency_Gap": "#3498DB"}, template="plotly_dark")
-        fig_durations.update_traces(textposition='outside', cliponaxis=False)
         st.plotly_chart(fig_durations, use_container_width=True)
     with chart_col2:
         st.subheader("🔢 Leads Distribution per Agent")
         fig_leads = px.bar(Qa_stats, x="Quality Agent Name", y="Total_Agent_Leads", color="Total_Agent_Leads", color_continuous_scale="YlOrRd", text_auto=True, template="plotly_dark")
-        fig_leads.update_traces(textposition='outside')
         st.plotly_chart(fig_leads, use_container_width=True)
 
     st.subheader("📉 Total Efficiency Gap Trend")
@@ -171,49 +156,21 @@ if uploaded_file is not None:
     with v_col1:
         st.subheader("Distribution by Agent")
         validation_counts = df_filtered.groupby(['Quality Agent Name', 'Validation']).size().reset_index(name='Lead Count')
-        fig_validation_bar = px.bar(validation_counts, x="Quality Agent Name", y="Lead Count", color="Validation", text_auto=True, barmode="stack",
-                                    color_discrete_map={"Smooth": "#2ECC71", "Handled": "#F1C40F", "Having Issue": "#E74C3C"}, template="plotly_dark")
-        st.plotly_chart(fig_validation_bar, use_container_width=True)
+        fig_val = px.bar(validation_counts, x="Quality Agent Name", y="Lead Count", color="Validation", text_auto=True, barmode="stack",
+                        color_discrete_map={"Smooth": "#2ECC71", "Handled": "#F1C40F", "Having Issue": "#E74C3C"}, template="plotly_dark")
+        st.plotly_chart(fig_val, use_container_width=True)
     with v_col2:
         st.subheader("Overall Status %")
-        overall_val_counts = df_filtered['Validation'].value_counts().reset_index()
-        overall_val_counts.columns = ['Status', 'Count']
-        fig_pie = px.pie(overall_val_counts, values='Count', names='Status', color='Status', hole=0.4,
+        overall_val = df_filtered['Validation'].value_counts().reset_index()
+        overall_val.columns = ['Status', 'Count']
+        fig_pie = px.pie(overall_val, values='Count', names='Status', color='Status', hole=0.4,
                          color_discrete_map={"Smooth": "#2ECC71", "Handled": "#F1C40F", "Having Issue": "#E74C3C"}, template="plotly_dark")
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_pie, use_container_width=True)
 
     st.divider()
-
-    # SECTION 3: DATA TABLE
     st.header("🔍 Detailed Statistics Table")
     st.dataframe(Qa_stats.style.background_gradient(cmap='RdYlGn', subset=['Total_Efficiency_Gap']).format(precision=2), use_container_width=True)
-
-    # SECTION 4 & 5: GLOBAL CLOSING & DETAILED REPORT
-    st.divider()
-    st.header("Closing Disposition Analysis")
-    df_global = df_processed.copy()
-    df_global['Closing Status'] = df_global['Closing Status'].fillna('Unknown')
-    all_dispo_global = sorted(df_global['Closing Status'].unique().tolist())
-    if 'selected_dispo_global' not in st.session_state: st.session_state.selected_dispo_global = all_dispo_global
-    def select_all_global(): st.session_state.selected_dispo_global = all_dispo_global
-    def clear_all_global(): st.session_state.selected_dispo_global = []
-
-    st.write("🔍 **Filter Globally by Closing Status:**")
-    dg1, dg2, _ = st.columns([1, 1, 6])
-    with dg1: st.button("✅ Select All Status", on_click=select_all_global, key="dispo_all_global", use_container_width=True)
-    with dg2: st.button("❌ Clear All Status", on_click=clear_all_global, key="dispo_clear_global", use_container_width=True)
-    selected_dispo_global = st.multiselect("Select Status:", options=all_dispo_global, key='selected_dispo_global', label_visibility="collapsed")
-    df_closing_global = df_global[df_global['Closing Status'].isin(selected_dispo_global)]
-
-    if selected_dispo_global:
-        st.subheader("Global Overall Closing %")
-        fig_global_pie = px.pie(df_closing_global.groupby('Closing Status').size().reset_index(name='Count'), values='Count', names='Closing Status', hole=0.4, template="plotly_dark")
-        st.plotly_chart(fig_global_pie, use_container_width=True)
-        
-        st.header("📋 Detailed Leads Report")
-        VIEW_COLUMNS = ["MCN","Quality Agent Name", "First Name", "Last Name", "Date of Sale", "Closing Status", "Validation", "Call duration", "Work duration", "Recording link"]
-        st.dataframe(df_closing_global[[c for c in VIEW_COLUMNS if c in df_closing_global.columns]], column_config={"Recording link": st.column_config.LinkColumn("🔗 Recording link")}, use_container_width=True, hide_index=True)
 
     # --- SECTION 6: DATA INTEGRITY ALERTS ---
     st.divider()
@@ -227,13 +184,14 @@ if uploaded_file is not None:
         df_all_problems["⚠️ MISSING FIELDS"] = df_all_problems.apply(get_miss, axis=1)
         all_issue_types = sorted(df_all_problems["⚠️ MISSING FIELDS"].unique().tolist())
         if 'selected_issues' not in st.session_state: st.session_state.selected_issues = all_issue_types
-        def select_all_issues(): st.session_state.selected_issues = all_issue_types
-        def clear_all_issues(): st.session_state.selected_issues = []
+        def select_all_iss(): st.session_state.selected_issues = all_issue_types
+        def clear_all_iss(): st.session_state.selected_issues = []
 
         st.write("🔍 **Dynamic Filter: Need Update In**")
         i1, i2, _ = st.columns([1, 1, 6])
-        with i1: st.button("✅ Select All Types", on_click=select_all_issues, key="issue_all_btn", use_container_width=True)
-        with i2: st.button("❌ Clear All Types", on_click=clear_all_issues, key="issue_clear_btn", use_container_width=True)
+        with i1: st.button("✅ Select All Types", on_click=select_all_iss, key="issue_all_btn", use_container_width=True)
+        with i2: st.button("❌ Clear All Types", on_click=clear_all_iss, key="issue_clear_btn", use_container_width=True)
+        
         selected_issues = st.multiselect("Filter combinations:", options=all_issue_types, key='selected_issues', label_visibility="collapsed")
         df_problems = df_all_problems[df_all_problems["⚠️ MISSING FIELDS"].isin(selected_issues)]
 
@@ -249,9 +207,13 @@ if uploaded_file is not None:
                                 f'<h2>{count} Leads</h2></div>', unsafe_allow_html=True)
 
             SPECIFIC_COLUMNS = ["⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", "Dialer", "Closing Status", "Date of Sale", "Assign Date","Finish Date","Call duration", "Work duration", "Quality Agent Name", "Validation", "Recording link"]
-            st.dataframe(df_problems[[c for c in SPECIFIC_COLUMNS if c in df_problems.columns]], use_container_width=True, hide_index=True)
+            st.dataframe(df_problems[[c for c in SPECIFIC_COLUMNS if c in df_problems.columns]], use_container_width=True, hide_index=True,
+                         column_config={"Recording link": st.column_config.LinkColumn("🔗 Link"), "Date of Sale": st.column_config.DateColumn("📅 Sale Date")})
+            
+            csv = df_problems.to_csv(index=False).encode('utf-8')
+            st.download_button(label="📥 Download This Selection (CSV)", data=csv, file_name='Targeted_Issues_Report.csv', mime='text/csv')
     else:
-        st.success("✅ Excellent! Data is complete.")
+        st.success("✅ Data is 100% complete!")
 
 else:
     st.info("📂 Please upload your CSV file to view the analysis.")
