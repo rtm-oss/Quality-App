@@ -266,62 +266,113 @@ if uploaded_file is not None:
     csv = df_closing_global.to_csv(index=False).encode('utf-8')
     st.download_button(label="📥 Download Filtered Leads as CSV", data=csv, file_name='Global_Filtered_QA_Report.csv', mime='text/csv')
 
-    # --- SECTION 6: DATA INTEGRITY ALERTS ---
-    st.divider()
-    st.header("🛡️ Missing Data Report & Analysis")
-    REQUIRED_FIELDS = ["Assign Date", "Finish Date", "Recording link", "Validation", "QA Feedback"]
+    # --- SECTION 6: DATA INTEGRITY ALERTS (FINAL REVIEW) ---
+st.divider()
+st.header("🛡️ Missing Data Report & Analysis")
 
-    missing_mask = df_filtered[REQUIRED_FIELDS].isnull().any(axis=1)
-    df_all_problems = df_filtered[missing_mask].copy()
+# تم إزالة QA Feedback من قائمة الأعمدة المطلوبة للفحص بناءً على طلبك
+REQUIRED_FIELDS = ["Assign Date", "Finish Date", "Recording link", "Validation"]
 
-    if not df_all_problems.empty:
-        def get_missing_columns(row):
-            missing = [field for field in REQUIRED_FIELDS if pd.isnull(row[field]) or str(row[field]).strip() == ""]
-            return ", ".join(missing)
+# 1. تحديد الصفوف التي بها أي قيمة فارغة في المعايير الجديدة
+missing_mask = df_filtered[REQUIRED_FIELDS].isnull().any(axis=1)
+df_all_problems = df_filtered[missing_mask].copy()
 
-        df_all_problems["⚠️ MISSING FIELDS"] = df_all_problems.apply(get_missing_columns, axis=1)
-        all_issue_types = sorted(df_all_problems["⚠️ MISSING FIELDS"].unique().tolist())
+if not df_all_problems.empty:
+    # 2. وظيفة لتحديد ما هو المفقود بالضبط (بدون QA Feedback)
+    def get_missing_columns(row):
+        missing = [field for field in REQUIRED_FIELDS if pd.isnull(row[field]) or str(row[field]).strip() == ""]
+        return ", ".join(missing)
 
-        if 'selected_issues' not in st.session_state:
-            st.session_state.selected_issues = all_issue_types
+    df_all_problems["⚠️ MISSING FIELDS"] = df_all_problems.apply(get_missing_columns, axis=1)
+    
+    # الحصول على القائمة الفريدة لأنواع النقص
+    all_issue_types = sorted(df_all_problems["⚠️ MISSING FIELDS"].unique().tolist())
 
-        def select_all_issues(): st.session_state.selected_issues = all_issue_types
-        def clear_all_issues(): st.session_state.selected_issues = []
+    # 3. إدارة الـ Session State للفلاتر الديناميكية
+    if 'selected_issues' not in st.session_state:
+        st.session_state.selected_issues = all_issue_types
 
-        st.write("🔍 **Dynamic Filter: Need Update In**")
-        i_btn_col1, i_btn_col2, _ = st.columns([1, 1, 6])
-        with i_btn_col1: st.button("✅ Select All Types", on_click=select_all_issues, key="issue_all_btn", use_container_width=True)
-        with i_btn_col2: st.button("❌ Clear All Types", on_click=clear_all_issues, key="issue_clear_btn", use_container_width=True)
+    def select_all_issues(): st.session_state.selected_issues = all_issue_types
+    def clear_all_issues(): st.session_state.selected_issues = []
 
-        selected_issues = st.multiselect("Filter combinations:", options=all_issue_types, key='selected_issues', label_visibility="collapsed")
-        df_problems = df_all_problems[df_all_problems["⚠️ MISSING FIELDS"].isin(selected_issues)]
+    st.write("🔍 **Dynamic Filter: Need Update In**")
+    i_btn_col1, i_btn_col2, _ = st.columns([1, 1, 6])
+    with i_btn_col1:
+        st.button("✅ Select All Types", on_click=select_all_issues, key="issue_all_btn", use_container_width=True)
+    with i_btn_col2:
+        st.button("❌ Clear All Types", on_click=clear_all_issues, key="issue_clear_btn", use_container_width=True)
 
-        if not selected_issues:
-            st.warning("⚠️ Please select at least one combination.")
-        elif df_problems.empty:
-            st.info("ℹ️ No leads found.")
-        else:
-            st.subheader("📊 Missing Data Summary")
-            issue_counts = df_problems["⚠️ MISSING FIELDS"].value_counts()
-            cols = st.columns(len(issue_counts) if len(issue_counts) < 5 else 4)
-            colors = ["#FF4B4B", "#FFA500", "#1F77B4", "#9B59B6", "#00D2FF", "#FF00FF"]
-            for i, (issue_type, count) in enumerate(issue_counts.items()):
-                with cols[i % (len(cols))]:
-                    st.markdown(f'<div style="background-color:rgba(255,255,255,0.05);border-left:10px solid {colors[i%len(colors)]};padding:15px;border-radius:8px;min-height:120px;">'
-                                f'<p style="color:{colors[i%len(colors)]};font-size:13px;font-weight:bold;margin:0;">{issue_type}</p>'
-                                f'<h2 style="color:white;margin:5px 0 0 0;">{count} <span style="font-size:14px;color:#888;">Leads</span></h2></div>', unsafe_allow_html=True)
+    selected_issues = st.multiselect("Filter combinations:", options=all_issue_types, key='selected_issues', label_visibility="collapsed")
 
-            st.markdown("<br>", unsafe_allow_html=True)
-            SPECIFIC_COLUMNS = ["⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", "Dialer", "Closing Status", "Date of Sale", "Assign Date","Finish Date","Call duration", "Work duration", "Quality Agent Name", "Validation","QA Feedback", "Recording link"]
-            st.dataframe(df_problems[[c for c in SPECIFIC_COLUMNS if c in df_problems.columns]], use_container_width=True, hide_index=True,
-                         column_config={"Recording link": st.column_config.LinkColumn("🔗 Link"), "Date of Sale": st.column_config.DateColumn("📅 Date")})
+    # تصفية البيانات بناءً على الاختيار
+    df_problems = df_all_problems[df_all_problems["⚠️ MISSING FIELDS"].isin(selected_issues)]
+
+    if not selected_issues:
+        st.warning("⚠️ Please select at least one combination to view the report.")
+    elif df_problems.empty:
+        st.info("ℹ️ No leads found for this selection.")
     else:
-        st.success("✅ Excellent! Data is 100% complete.")
+        # 4. العدادات الملونة المحدثة
+        st.subheader("📊 Missing Data Summary")
+        issue_counts = df_problems["⚠️ MISSING FIELDS"].value_counts()
+        
+        cols = st.columns(len(issue_counts) if len(issue_counts) < 5 else 4)
+        colors = ["#FF4B4B", "#FFA500", "#1F77B4", "#9B59B6", "#00D2FF", "#FF00FF"]
+        
+        for i, (issue_type, count) in enumerate(issue_counts.items()):
+            col_idx = i % (len(cols))
+            color = colors[i % len(colors)]
+            with cols[col_idx]:
+                st.markdown(
+                    f"""
+                    <div style="
+                        background-color: rgba(255, 255, 255, 0.05);
+                        border: 1px solid {color};
+                        border-left: 10px solid {color};
+                        padding: 15px;
+                        border-radius: 8px;
+                        text-align: left;
+                        margin-bottom: 10px;
+                        min-height: 120px;
+                    ">
+                        <p style="color: {color}; font-size: 13px; font-weight: bold; margin: 0; min-height: 40px;">{issue_type}</p>
+                        <h2 style="color: white; margin: 5px 0 0 0;">{count} <span style="font-size: 14px; color: #888;">Leads</span></h2>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        # 5. الجدول المخصص (بدون عرض QA Feedback كأولوية في البحث)
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("📋 Targeted Issues List")
+        
+        SPECIFIC_COLUMNS = [
+            "⚠️ MISSING FIELDS", "MCN", "Opener Status", "Client", "Campaign", 
+            "Dialer", "Closing Status", "Date of Sale", "Call duration", 
+            "Work duration", "Quality Agent Name", "Validation", "Recording link"
+        ]
+        available_cols = [col for col in SPECIFIC_COLUMNS if col in df_problems.columns]
+
+        st.dataframe(
+            df_problems[available_cols],
+            column_config={
+                "Recording link": st.column_config.LinkColumn("🔗 Link"),
+                "Date of Sale": st.column_config.DateColumn("📅 Sale Date"),
+                "Call duration": st.column_config.NumberColumn("📞 Call (m)", format="%.1f"),
+                "Work duration": st.column_config.NumberColumn("⏱️ Work (m)", format="%.1f"),
+                "⚠️ MISSING FIELDS": st.column_config.TextColumn("⚠️ NEEDS UPDATE IN:", width="medium")
+            },
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # 6. زر تحميل الاختيار الحالي
+        csv_problems = df_problems[available_cols].to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download This Selection (CSV)",
+            data=csv_problems,
+            file_name='Targeted_Issues_Report.csv',
+            mime='text/csv',
+        )
 else:
-    st.info("📂 Please upload your CSV file to view the dashboard analysis.")
-
-
-
-
-
-
+    st.success("✅ Excellent! All records in this selection are complete for Dates, Links, and Validation.")
