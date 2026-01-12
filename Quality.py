@@ -212,7 +212,7 @@ if uploaded_file is not None:
 
     # SECTION 4: GLOBAL CLOSING DISPOSITION ANALYSIS (FULL DATA)
     st.divider()
-    st.header("🌍 Closing Disposition Analysis")
+    st.header("Closing Disposition Analysis")
 
     df_global = df_processed.copy()
     df_global['Closing Status'] = df_global['Closing Status'].fillna('Unknown')
@@ -319,4 +319,5 @@ if uploaded_file is not None:
         st.success("✅ Excellent! Data is 100% complete.")
 else:
     st.info("📂 Please upload your CSV file to view the dashboard analysis.")
+
 
