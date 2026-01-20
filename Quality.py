@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
-
+s
 # 1. Page Configuration
 st.set_page_config(page_title="📈 QA Dynamic Dashboard", layout="wide")
 st.title("⚖️ Quality Agents Dynamic Analysis")
@@ -217,3 +217,4 @@ if uploaded_file is not None:
 
 else:
     st.info("📂 Please upload your CSV file to view the analysis.")
+
