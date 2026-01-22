@@ -1,5 +1,7 @@
 pandas
 numpy
-streamlit
 plotly
 matplotlib
+streamlit>=1.20.0
+altair==4.2.2
+
