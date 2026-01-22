@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
+import altair as alt
 
 # 1. Page Configuration
 st.set_page_config(page_title="📈 QA Dynamic Dashboard", layout="wide")
@@ -217,5 +218,6 @@ if uploaded_file is not None:
 
 else:
     st.info("📂 Please upload your CSV file to view the analysis.")
+
 
 
